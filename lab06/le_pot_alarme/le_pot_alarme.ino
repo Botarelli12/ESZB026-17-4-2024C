@@ -9,15 +9,16 @@ const int pinoLED = LED_BUILTIN;   // pino do LED do alarme (LED na placa do Ard
 int dadoRecebido;                  // guarda o dado recebido
 int limiteAlarme = 0;              // limite do alarme
 int valorPot = 0;                  // guarda o valor lido no potenciometro
-byte buffer[5];                    // guarda o valor lido, limite de alarme e valor do LED
+byte buffer[7];                    // guarda o valor lido, limite de alarme e valor do LED
+float valorvolts;
  
 void setup(){
   pinMode(pinoLED, OUTPUT);        // usar um LED como alarme
   TWBR=10000L;                     // a frequencia do i2c: 10000L = 10kHz
-  Wire.begin(enderecoEscravo);i     // configura o Arduino como um dispositivo escravo
+  Wire.begin(enderecoEscravo);     // configura o Arduino como um dispositivo escravo
   Wire.onReceive(funcaoDadoRecebido); // ajusta a funcao chamada ao receber um dado
   Wire.onRequest(funcaoResposta);  // ajusta a funcao chamada para responder
-  Serial.begin(9600, SERIAL_8N1);         // opcional, para debug
+  Serial.begin(9600);         // opcional, para debug
   Serial.println("Fim da configuracao!"); // opcional, para debug
 }
 
@@ -25,17 +26,32 @@ void enviaDadosPelaSerial(){              // opcional, para debug
   Serial.print("Valor lido: "); Serial.print(valorPot);
   Serial.print("; limite do alarme: "); Serial.print(limiteAlarme);
   Serial.print("; e buffer = 0x");
-  Serial.print(buffer[0],HEX); Serial.print(" "); // byte menos significativo do valor lido
-  Serial.print(buffer[1],HEX); Serial.print(" "); // byte mais significativo do valor lido
-  Serial.print(buffer[2],HEX); Serial.print(" "); // byte menos significativo do alarme
-  Serial.print(buffer[3],HEX); Serial.print(" "); // byte mais significativo do alarme
-  Serial.println(buffer[4],HEX);                  // valor ajustado no LED
+  for (int i = 0; i < 5; i++) {
+    Serial.print(buffer[i], HEX);
+    Serial.print(" ");
+  }
+  for (int i = 5; i < 7; i++) {
+    Serial.print(buffer[i]);
+    Serial.print(" ");
+  }
+  Serial.print("; volts: "); Serial.print(valorvolts);
+  Serial.println();
 }
+//  Serial.print(buffer[0],HEX); Serial.print(" "); // byte menos significativo do valor lido
+//  Serial.print(buffer[1],HEX); Serial.print(" "); // byte mais significativo do valor lido
+//  Serial.print(buffer[2],HEX); Serial.print(" "); // byte menos significativo do alarme
+//  Serial.print(buffer[3],HEX); Serial.print(" "); // byte mais significativo do alarme
+//  Serial.println(buffer[4],HEX);                  // valor ajustado no LED
+//}
 
 void loop(){                       // Le o valor no potenciometro a cada 1 segundo
   valorPot = analogRead(PinoPotenciometro); // le dado com ADC de 10-bit
   buffer[0] = valorPot & 0xFF;     // byte menos significativo
   buffer[1] = valorPot >> 8;       // byte mais significativo
+
+  valorvolts = valorPot*5.0/1023.0;  // valorvolts = 2,34567
+  buffer[5] = (int)valorvolts;               // 2
+  buffer[6] = (int)(valorvolts*100) - buffer[5]*100 ;             // 34
   if (valorPot >= limiteAlarme) {  // verifica limite de alarme
      digitalWrite(pinoLED, HIGH);  // liga o LED do alarme
      buffer[4] = 0x01;
@@ -61,11 +77,17 @@ void funcaoDadoRecebido(int x){    // funcao chamada ao receber um dado
       limiteAlarme = valorRecebido;
     }
   }
+  if ( dadoRecebido == 0x10){
+    limiteAlarme = valorPot;
+    buffer[2] = limiteAlarme & 0xFF;
+    buffer[3] = limiteAlarme >> 8;
+  }
 }
- 
+
+
 void funcaoResposta(){             // funcao chamada para responder
   byte resposta = 0x00;
-  if ( dadoRecebido >= 0x00 && dadoRecebido <= 0x04 ){
+  if ( dadoRecebido >= 0x00 && dadoRecebido <= 0x06 ){
     resposta = buffer[dadoRecebido];
   }
   delay(1);                        // pode ser necessario em velocidades de comunicacao mais altas
