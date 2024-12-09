@@ -14,6 +14,20 @@ def inicia_coleta():
 
 def para_coleta():
     conexaoSerial.write(b'p')
+    
+def envia_intervalo():
+    conexaoSerial.write(b'x')
+    dado1 = conexaoSerial.read()
+    dado2 = conexaoSerial.read()
+    intervalo = float( (ord(dado1) + ord(dado2)*256.0) )
+    print(intervalo)
+    texto2.setText("int: "+str(intervalo).zfill(3)+"ms" )
+    
+def aumenta_intervalo():
+    conexaoSerial.write(b'a')
+    
+def diminui_intervalo():
+    conexaoSerial.write(b'd')
 
 def saindo():
     conexaoSerial.write(b'p')
@@ -53,6 +67,9 @@ previousTime = time.time()*1000 # pega a hora atual, em milissegundos
 texto = pg.TextItem(text="", color=(255,255,0), anchor=(0,1))
 p1.addItem(texto)
 texto.setPos(0,0) # adiciona o texto na posicao (0,0) do grafico
+texto2 = pg.TextItem(text="", color=(255,255,0), anchor=(0,1))
+p1.addItem(texto2)
+texto2.setPos(600,4.5) # adiciona o texto na posicao (0,0) do grafico
 
 proxy1 = QtGui.QGraphicsProxyWidget()
 botao1 = QtGui.QPushButton('Inicia')
@@ -64,9 +81,27 @@ botao2 = QtGui.QPushButton('Para')
 proxy2.setWidget(botao2)
 botao2.clicked.connect(para_coleta)
 
+proxy3 = QtGui.QGraphicsProxyWidget()
+botao3 = QtGui.QPushButton('Envia intervalo')
+proxy3.setWidget(botao3)
+botao3.clicked.connect(envia_intervalo)
+
+proxy4 = QtGui.QGraphicsProxyWidget()
+botao4 = QtGui.QPushButton('Aumenta intervalo')
+proxy4.setWidget(botao4)
+botao4.clicked.connect(aumenta_intervalo)
+
+proxy5 = QtGui.QGraphicsProxyWidget()
+botao5 = QtGui.QPushButton('Diminui intervalo')
+proxy5.setWidget(botao5)
+botao5.clicked.connect(diminui_intervalo)
+
 p2 = win.addLayout(row=1, col=0)
 p2.addItem(proxy1,row=0,col=0)
 p2.addItem(proxy2,row=1,col=0)
+p2.addItem(proxy3,row=2,col=0)
+p2.addItem(proxy4,row=3,col=0)
+p2.addItem(proxy5,row=4,col=0)
 
 conexaoSerial = serial.Serial('/dev/ttyACM0',115200)
 conexaoSerial.write(b'i')
