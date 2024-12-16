@@ -34,28 +34,31 @@ def monitor_temperature():
                 try:
                     # Lê uma linha da porta serial
                     line = ser.readline().decode("utf-8").strip()
-                    
-                    # Converte a leitura em temperatura (esperando que seja um número)
-                    temperature = float(line)
 
-                    # Verifica o status com base na temperatura
-                    status = "Normal" if 25 <= temperature <= 30 else "Alerta"
+                    # Verifica se o valor recebido é válido
+                    if line.isnumeric() or (line.replace('.', '', 1).isdigit() and line.count('.') <= 1):
+                        temperature = float(line)
 
-                    # Armazena os dados
-                    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    new_entry = {
-                        "time": current_time,
-                        "temperature": temperature,
-                        "status": status
-                    }
+                        # Verifica o status com base na temperatura
+                        status = "Normal" if 25 <= temperature <= 30 else "Alerta"
 
-                    # Carrega os dados existentes, adiciona a nova entrada e salva
-                    data = load_data()
-                    data.append(new_entry)
-                    save_data(data)
+                        # Armazena os dados
+                        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        new_entry = {
+                            "time": current_time,
+                            "temperature": temperature,
+                            "status": status
+                        }
 
-                    # Exibe os dados no console (para fins de depuração)
-                    print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
+                        # Carrega os dados existentes, adiciona a nova entrada e salva
+                        data = load_data()
+                        data.append(new_entry)
+                        save_data(data)
+
+                        # Exibe os dados no console (para fins de depuração)
+                        print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
+                    else:
+                        print(f"Erro: Valor recebido '{line}' não é um número válido.")
 
                 except ValueError:
                     # Ignora linhas que não possam ser convertidas para float
