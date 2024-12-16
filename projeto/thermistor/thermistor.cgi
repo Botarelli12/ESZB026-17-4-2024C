@@ -4,20 +4,24 @@ import cgitb
 import json
 import datetime
 import matplotlib.pyplot as plt
+import os
 
 # Ativar a depuração de erros CGI
 cgitb.enable()
 
 # Caminho do arquivo JSON com os dados registrados
 DATA_FILE = "/tmp/temperature_data.json"
+CHART_FILE = "/tmp/temperature_chart.png"
 
 # Função para carregar os dados do arquivo JSON
 def load_data():
+    if not os.path.exists(DATA_FILE):
+        return []  # Retorna uma lista vazia caso o arquivo não exista
     try:
         with open(DATA_FILE, "r") as file:
             return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+    except json.JSONDecodeError:
+        return []  # Retorna uma lista vazia se o arquivo estiver corrompido
 
 # Função para criar o gráfico de temperatura
 def create_temperature_chart(data):
@@ -35,7 +39,7 @@ def create_temperature_chart(data):
     plt.tight_layout()
     
     # Salva o gráfico como uma imagem
-    plt.savefig("/tmp/temperature_chart.png")
+    plt.savefig(CHART_FILE)
     plt.close()
 
 # Geração da página HTML
@@ -74,7 +78,7 @@ def generate_html(data):
         <p><strong>Temperatura atual:</strong> {current_temp:.2f} °C</p>
         <p><strong>Status:</strong> {current_status}</p>
         <h2>Gráfico de Temperatura</h2>
-        <img src="/tmp/temperature_chart.png" alt="Gráfico de Temperatura">
+        <img src="{CHART_FILE}" alt="Gráfico de Temperatura">
     </body>
     </html>
     """
