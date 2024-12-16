@@ -34,6 +34,8 @@ def monitor_temperature():
                 try:
                     # Lê uma linha da porta serial
                     line = ser.readline().decode("utf-8").strip()
+                    if "°C" in line:
+                        line = line.replace("°C", "")strip()
 
                     # Tenta converter a linha para float
                     try:
