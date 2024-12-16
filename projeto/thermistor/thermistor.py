@@ -57,7 +57,6 @@ def monitor_temperature():
 
                         # Exibe os dados no console (para fins de depuração)
                         print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
-                
                 time.sleep(1)  # Intervalo de 1 segundo entre as leituras
 
     except serial.SerialException as e:
