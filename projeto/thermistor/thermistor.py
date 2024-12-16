@@ -4,7 +4,7 @@ import datetime
 import time
 
 # Configuração da porta serial
-SERIAL_PORT = "/dev/ttyACM0" 
+SERIAL_PORT = "/dev/ttyUSB0"  # Altere para a porta correta do Arduino
 BAUD_RATE = 9600
 TIMEOUT = 2  # Timeout para a comunicação serial
 
@@ -36,35 +36,38 @@ def monitor_temperature():
                     line = ser.readline().decode("utf-8").strip()
 
                     # Tenta converter a linha para float
-                    temperature = float(line)
+                    try:
+                        temperature = float(line)
 
-                    # Verifica o status com base na temperatura
-                    status = "Normal" if 25 <= temperature <= 30 else "Alerta"
+                        # Verifica o status com base na temperatura
+                        status = "Normal" if 25 <= temperature <= 30 else "Alerta"
 
-                    # Armazena os dados
-                    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    new_entry = {
-                        "time": current_time,
-                        "temperature": temperature,
-                        "status": status
-                    }
+                        # Armazena os dados
+                        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        new_entry = {
+                            "time": current_time,
+                            "temperature": temperature,
+                            "status": status
+                        }
 
-                    # Carrega os dados existentes, adiciona a nova entrada e salva
-                    data = load_data()
-                    data.append(new_entry)
-                    save_data(data)
+                        # Carrega os dados existentes, adiciona a nova entrada e salva
+                        data = load_data()
+                        data.append(new_entry)
+                        save_data(data)
 
-                    # Exibe os dados no console (para fins de depuração)
-                    print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
+                        # Exibe os dados no console (para fins de depuração)
+                        print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
 
-                except Exception as e:
-                    # Captura todos os erros
-                    print(f"Erro: {e}")
-                
+                    except ValueError:
+                        # Se a conversão falhar, trata o erro e continua
+                        print(f"Erro: Valor recebido '{line}' não é um número válido.")
+
+                except ValueError:
+                    # Ignora linhas que não possam ser convertidas para float
+                    print("Erro: Valor recebido não é um número válido.")
                 time.sleep(1)  # Intervalo de 1 segundo entre as leituras
 
     except serial.SerialException as e:
-        # Erro na comunicação serial
         print(f"Erro na comunicação serial: {e}")
 
 if __name__ == "__main__":
