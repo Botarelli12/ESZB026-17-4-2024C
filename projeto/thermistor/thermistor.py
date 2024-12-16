@@ -1,10 +1,10 @@
-import serial  # Biblioteca para comunicação serial
+import serial  # Biblioteca para comunicação serial 
 import json
 import datetime
 import time
 
 # Configuração da porta serial
-SERIAL_PORT = "/dev/ttyACM0"  # Altere para a porta correta do Arduino
+SERIAL_PORT = "/dev/ttyUSB0"  # Altere para a porta correta do Arduino
 BAUD_RATE = 9600
 TIMEOUT = 2  # Timeout para a comunicação serial
 
@@ -35,8 +35,8 @@ def monitor_temperature():
                     # Lê uma linha da porta serial
                     line = ser.readline().decode("utf-8").strip()
 
-                    # Verifica se o valor recebido é válido
-                    if line.isnumeric() or (line.replace('.', '', 1).isdigit() and line.count('.') <= 1):
+                    # Tenta converter a linha para float
+                    try:
                         temperature = float(line)
 
                         # Verifica o status com base na temperatura
@@ -57,7 +57,9 @@ def monitor_temperature():
 
                         # Exibe os dados no console (para fins de depuração)
                         print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
-                    else:
+
+                    except ValueError:
+                        # Se a conversão falhar, trata o erro e continua
                         print(f"Erro: Valor recebido '{line}' não é um número válido.")
 
                 except ValueError:
