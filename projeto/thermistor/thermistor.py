@@ -4,7 +4,7 @@ import datetime
 import time
 
 # Configuração da porta serial
-SERIAL_PORT = "/dev/ttyUSB0"  # Altere para a porta correta do Arduino
+SERIAL_PORT = "/dev/ttyACM0"  # Altere para a porta correta do Arduino
 BAUD_RATE = 9600
 TIMEOUT = 2  # Timeout para a comunicação serial
 
