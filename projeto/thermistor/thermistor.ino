@@ -18,13 +18,13 @@ void setup() {
 
 void loop() {
   float temperature = temp.getTemp(); // Lê a temperatura do sensor
-  Serial.print("Temperatura: ");
-  Serial.print(temperature);
-  Serial.println("°C");
+  //Serial.print("Temperatura: ");
+  Serial.println(temperature);
+  //Serial.println("°C");
 
   // Verifica se a temperatura está fora da faixa aceitável
-  if (temperature >= LIMITE_INF && temperature <= LIMITE_SUP) {
-    Serial.println("Alerta! Temperatura fora da faixa aceitável.");
+  if (temperature <= LIMITE_INF || temperature >= LIMITE_SUP) {
+    //Serial.println("Alerta! Temperatura fora da faixa aceitável.");
     digitalWrite(LED, HIGH); // Liga o LED
     
     // Emite um único bip se o buzzer ainda não foi ativado
@@ -36,10 +36,10 @@ void loop() {
     }
   } else {
     // Temperatura está normal
-    Serial.println("Temperatura normal.");
+    //Serial.println("Temperatura normal.");
     digitalWrite(LED, LOW);   // Desliga o LED
     buzzer_ativado = false;   // Reseta o estado do buzzer
   }
 
-  delay(1000); // Intervalo de 1 segundo
+  delay(100); // Intervalo de 1 segundo
 }

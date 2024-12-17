@@ -25,5 +25,5 @@ void loop() {
     digitalWrite(LED, LOW);
     digitalWrite(BUZ, LOW);
   }
-  delay(100); //INTERVALO DE 1 SEGUNDO
+  delay(1000); //INTERVALO DE 1 SEGUNDO
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import serial  # Biblioteca para comunicação serial 
 import json
 import datetime
@@ -26,11 +28,13 @@ def save_data(data):
 
 # Função principal para monitorar a temperatura
 def monitor_temperature():
+    with open("/home/pi/sist_embarcados_git/lab07/gnuplot/dados.txt", "w") as arquivo:
+        arquivo.write("")
     try:
         # Inicia a comunicação serial
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=TIMEOUT) as ser:
             print(f"Conectado à porta serial {SERIAL_PORT} com baud rate {BAUD_RATE}.")
-            while True:
+            for tentaidx in range(30):
                 try:
                     # Lê uma linha da porta serial
                     line = ser.readline().decode("utf-8").strip()
@@ -57,6 +61,10 @@ def monitor_temperature():
 
                         # Exibe os dados no console (para fins de depuração)
                         print(f"[{current_time}] Temperatura: {temperature:.2f}°C | Status: {status}")
+                        
+                        with open("/home/pi/sist_embarcados_git/lab07/gnuplot/dados.txt", "a") as arquivo:
+                            arquivo.write(str(temperature))
+                            arquivo.write("\n")
 
                     except ValueError:
                         # Se a conversão falhar, trata o erro e continua
@@ -65,7 +73,7 @@ def monitor_temperature():
                 except ValueError:
                     # Ignora linhas que não possam ser convertidas para float
                     print("Erro: Valor recebido não é um número válido.")
-                time.sleep(1)  # Intervalo de 1 segundo entre as leituras
+                time.sleep(0.105)  # Intervalo de 1 segundo entre as leituras
 
     except serial.SerialException as e:
         print(f"Erro na comunicação serial: {e}")
